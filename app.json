@@ -1,0 +1,22 @@
+{
+    "applications": {
+        "laravel-app": {
+            "type": "php",
+            "processes": {
+                "max": 50,
+                "spare": 50
+            },
+            "root": "/www/laravel-app/public",
+            "index": "index.php",
+            "script": "index.php",
+            "options": {
+                "file": "/etc/php/7.3/cli/php.ini"
+            }
+        }
+    },
+    "listeners": {
+        "*:8000": {
+            "pass": "applications/laravel-app"
+        }
+    }
+}

@@ -1,0 +1,65 @@
+version: '3'
+services:
+
+  #Nginx Unit Service
+  app:
+    image: nginx/unit:1.20.0-php7.3
+    container_name: app
+    restart: always
+    volumes:
+      - ./laravel-app:/www/laravel-app
+      - ./app.json:/docker-entrypoint.d/app.json
+#    ports:
+#      - 8000:8000
+    networks:
+      - app-network
+
+  #Nginx Service
+  web:
+    image: nginx:alpine
+    container_name: web
+    restart: always
+    depends_on:
+      - app
+    volumes:
+      - ./laravel-app:/var/www
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - app-network
+
+  #PostgresSQL Service
+  db:
+    image: postgres
+    container_name: db
+    restart: always
+    volumes:
+      - ./db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${FA_DATABASE_USER}
+      POSTGRES_PASSWORD: ${FA_DATABASE_PASSWORD}
+    networks:
+      - app-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: always
+    depends_on:
+      - db
+    volumes:
+      - ./pgadmin-data:/var/lib/pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${FA_PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${FA_PGADMIN_PASSWORD}
+    ports:
+      - 81:80
+    networks:
+      - app-network
+
+#Docker Networks
+networks:
+  app-network:
+    driver: bridge
